@@ -1,0 +1,152 @@
+package model
+
+import (
+	"errors"
+	"html"
+	"strings"
+	"time"
+
+	"github.com/badoux/checkmail"
+	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
+)
+
+type Usuario struct {
+	ID           uint64    `gorm:"primary_key;auto_increment" json:"id"`
+	Nome         string    `gorm:"size:255;not null;unique" json:"nome"`
+	Email        string    `gorm:"size:100;not null;unique" json:"email"`
+	Senha        string    `gorm:"size:100;not null;"`
+	Apresentador bool      `gorm:"default:False;not null;" json:"apresentador"`
+	Ativo        bool      `gorm:"default:True;not null;" json:"ativo"`
+	Admin        bool      `gorm:"default:False;not null;"`
+	CreatedAt    time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"criado_em"`
+	UpdatedAt    time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"atualizado_em"`
+}
+
+func Hash(Senha string) ([]byte, error) {
+	return bcrypt.GenerateFromPassword([]byte(Senha), bcrypt.DefaultCost)
+}
+
+func VerifySenha(hashedSenha, Senha string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hashedSenha), []byte(Senha))
+}
+
+func (u *Usuario) Prepare() {
+	u.ID = 0
+	u.Nome = html.EscapeString(strings.TrimSpace(u.Nome))
+	u.Email = html.EscapeString(strings.TrimSpace(u.Email))
+	u.CreatedAt = time.Now()
+	u.UpdatedAt = time.Now()
+}
+
+func (u *Usuario) Validate(action string) error {
+	switch strings.ToLower(action) {
+	case "update":
+		if u.Nome == "" {
+			return errors.New("Obrigatório - Nome")
+		}
+		if u.Senha == "" {
+			return errors.New("Obrigatório - Senha")
+		}
+		if u.Email == "" {
+			return errors.New("Obrigatório - Email")
+		}
+		if err := checkmail.ValidateFormat(u.Email); err != nil {
+			return errors.New("Inválido - Email")
+		}
+
+		return nil
+	case "login":
+		if u.Senha == "" {
+			return errors.New("Obrigatório - Senha")
+		}
+		if u.Email == "" {
+			return errors.New("Obrigatório - Email")
+		}
+		if err := checkmail.ValidateFormat(u.Email); err != nil {
+			return errors.New("Inválido - Email")
+		}
+		return nil
+
+	default:
+		if u.Nome == "" {
+			return errors.New("Obrigatório - Nome")
+		}
+		if u.Senha == "" {
+			return errors.New("Obrigatório - Senha")
+		}
+		if u.Email == "" {
+			return errors.New("Obrigatório - Email")
+		}
+		if err := checkmail.ValidateFormat(u.Email); err != nil {
+			return errors.New("Inválido - Email")
+		}
+		return nil
+	}
+}
+
+func (u *Usuario) Save(db *gorm.DB) (*Usuario, error) {
+
+	var err error
+	err = db.Debug().Create(&u).Error
+	if err != nil {
+		return &Usuario{}, err
+	}
+	return u, nil
+}
+
+func (u *Usuario) List(db *gorm.DB) (*[]Usuario, error) {
+	var err error
+	Usuarios := []Usuario{}
+	err = db.Debug().Model(&Usuario{}).Limit(100).Find(&Usuarios).Error
+	if err != nil {
+		return &[]Usuario{}, err
+	}
+	return &Usuarios, err
+}
+
+func (u *Usuario) Find(db *gorm.DB, uid uint64) (*Usuario, error) {
+	var err error
+	err = db.Debug().Model(Usuario{}).Where("id = ?", uid).Take(&u).Error
+	if err != nil {
+		return &Usuario{}, err
+	}
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return &Usuario{}, errors.New("Usuario Inexistente")
+	}
+	return u, err
+}
+
+func (u *Usuario) Update(db *gorm.DB, uid uint64) (*Usuario, error) {
+
+	// To hash the Senha
+
+	db = db.Debug().Model(&Usuario{}).Where("id = ?", uid).Take(&Usuario{}).UpdateColumns(
+		map[string]interface{}{
+			"Senha":        u.Senha,
+			"Nome":         u.Nome,
+			"Email":        u.Email,
+			"Apresentador": u.Apresentador,
+			"updated_at":   time.Now(),
+		},
+	)
+	if db.Error != nil {
+		return &Usuario{}, db.Error
+	}
+	// This is the display the updated Usuario
+	err := db.Debug().Model(&Usuario{}).Where("id = ?", uid).Take(&u).Error
+	if err != nil {
+		return &Usuario{}, err
+	}
+	return u, nil
+}
+
+func (u *Usuario) Delete(db *gorm.DB, uid uint64) (int64, error) {
+
+	db = db.Debug().Model(&Usuario{}).Where("id = ?", uid).Take(&Usuario{}).Delete(&Usuario{})
+
+	if db.Error != nil {
+		return 0, db.Error
+	}
+	return db.RowsAffected, nil
+}
