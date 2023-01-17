@@ -1,4 +1,4 @@
-package model
+package models
 
 import (
 	"errors"
@@ -17,7 +17,7 @@ type Evento struct {
 	Local          string      `json:"local"`
 	Data           time.Time   `gorm:"default:CURRENT_TIMESTAMP" json:"data_evento"`
 	Instituicao    Instituicao `json:"instituicao"`
-	InstituicaoID  uint64      `gorm:"not null" json:"apresentador_id"`
+	InstituicaoID  uint64      `gorm:"not null" json:"instituicao_id"`
 	CreatedAt      time.Time   `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt      time.Time   `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
 }

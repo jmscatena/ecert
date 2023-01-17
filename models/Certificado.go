@@ -1,4 +1,4 @@
-package model
+package models
 
 import (
 	"errors"
@@ -18,7 +18,7 @@ type Certificado struct {
 	UpdatedAt      time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
 }
 
-func (p *Certificado) aValidate() error {
+func (p *Certificado) Validate() error {
 
 	if p.EventoID < 1 {
 		return errors.New("Obrigatório - Evento")
@@ -29,7 +29,7 @@ func (p *Certificado) aValidate() error {
 	return nil
 }
 
-func (p *Certificado) Save(db *gorm.DB) (*Certificado, error) {
+func (p *Certificado) Create(db *gorm.DB) (*Certificado, error) {
 	var err error
 	err = db.Debug().Model(&Certificado{}).Create(&p).Error
 	if err != nil {

@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/jmscatena/ecert-back-go/model"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -34,12 +33,5 @@ func Init() (*gorm.DB, error) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-
-	db.AutoMigrate(&model.Certificado{})
-	db.AutoMigrate(&model.Evento{})
-	db.AutoMigrate(&model.Usuario{})
-	db.AutoMigrate(&model.Instituicao{})
-	db.AutoMigrate(&model.CertVal{})
-
 	return db, err
 }

@@ -1,4 +1,4 @@
-package model
+package models
 
 import (
 	"errors"
@@ -24,7 +24,7 @@ func (v *CertVal) Validate() error {
 	return nil
 }
 
-func (v *CertVal) Save(db *gorm.DB) (*CertVal, error) {
+func (v *CertVal) Create(db *gorm.DB) (*CertVal, error) {
 	var err error
 	err = db.Debug().Model(&CertVal{}).Create(&v).Error
 	if err != nil {

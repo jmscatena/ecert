@@ -1,4 +1,4 @@
-package model
+package models
 
 import (
 	"errors"
@@ -57,7 +57,7 @@ func (i *Instituicao) Find(db *gorm.DB, uuid uint64) (*Instituicao, error) {
 	return i, err
 }
 
-func (i *Instituicao) Save(db *gorm.DB) (*Instituicao, error) {
+func (i *Instituicao) Create(db *gorm.DB) (*Instituicao, error) {
 	var err error
 	err = db.Debug().Create(&i).Error
 	if err != nil {
