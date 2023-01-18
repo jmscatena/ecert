@@ -57,13 +57,16 @@ func (i *Instituicao) Find(db *gorm.DB, uuid uint64) (*Instituicao, error) {
 	return i, err
 }
 
-func (i *Instituicao) Create(db *gorm.DB) (*Instituicao, error) {
-	var err error
-	err = db.Debug().Create(&i).Error
-	if err != nil {
-		return &Instituicao{}, err
+func (i *Instituicao) Create(db *gorm.DB) (int64, error) {
+	var verr error
+	if verr = i.Validate("insert"); verr != nil {
+		return -1, verr
 	}
-	return i, nil
+	err := db.Debug().Create(&i).Error
+	if err != nil {
+		return 0, err
+	}
+	return int64(i.ID), nil
 }
 
 func (i *Instituicao) Update(db *gorm.DB, uuid uint64) (*Instituicao, error) {

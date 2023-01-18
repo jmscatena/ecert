@@ -44,19 +44,22 @@ func (p *Evento) Validate() error {
 	return nil
 }
 
-func (p *Evento) Save(db *gorm.DB) (*Evento, error) {
-	var err error
-	err = db.Debug().Model(&Evento{}).Create(&p).Error
+func (p *Evento) Create(db *gorm.DB) (int64, error) {
+	var verr error
+	if verr = p.Validate(); verr != nil {
+		return -1, verr
+	}
+	err := db.Debug().Model(&Evento{}).Create(&p).Error
 	if err != nil {
-		return &Evento{}, err
+		return 0, err
 	}
 	if p.ID != 0 {
 		err = db.Debug().Model(&Usuario{}).Where("id = ?", p.ApresentadorID).Take(&p.Apresentador).Error
 		if err != nil {
-			return &Evento{}, err
+			return -2, err
 		}
 	}
-	return p, nil
+	return int64(p.ID), nil
 }
 
 func (p *Evento) List(db *gorm.DB) (*[]Evento, error) {

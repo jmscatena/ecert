@@ -24,13 +24,16 @@ func (v *CertVal) Validate() error {
 	return nil
 }
 
-func (v *CertVal) Create(db *gorm.DB) (*CertVal, error) {
-	var err error
-	err = db.Debug().Model(&CertVal{}).Create(&v).Error
-	if err != nil {
-		return &CertVal{}, err
+func (v *CertVal) Create(db *gorm.DB) (int64, error) {
+	var verr error
+	if verr = v.Validate(); verr != nil {
+		return -1, verr
 	}
-	return v, nil
+	err := db.Debug().Model(&CertVal{}).Create(&v).Error
+	if err != nil {
+		return 0, err
+	}
+	return int64(v.ID), nil
 }
 
 func (v *CertVal) List(db *gorm.DB) (*[]CertVal, error) {

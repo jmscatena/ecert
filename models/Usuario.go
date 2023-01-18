@@ -40,13 +40,16 @@ func (u *Usuario) Prepare() {
 	u.UpdatedAt = time.Now()
 }
 
-func (u *Usuario) Create(db *gorm.DB) (uint64, error) {
+func (u *Usuario) Create(db *gorm.DB) (int64, error) {
+	if verr := u.Validate("insert"); verr != nil {
+		return -2, verr
+	}
 	u.Prepare()
 	err := db.Debug().Create(&u).Error
 	if err != nil {
 		return 0, err
 	}
-	return u.ID, nil
+	return int64(u.ID), nil
 }
 
 func (u *Usuario) List(db *gorm.DB) (*[]Usuario, error) {
@@ -120,7 +123,6 @@ func (u *Usuario) Validate(action string) error {
 		if err := checkmail.ValidateFormat(u.Email); err != nil {
 			return errors.New("Inválido - Email")
 		}
-
 		return nil
 	case "login":
 		if u.Senha == "" {
@@ -133,7 +135,6 @@ func (u *Usuario) Validate(action string) error {
 			return errors.New("Inválido - Email")
 		}
 		return nil
-
 	default:
 		if u.Nome == "" {
 			return errors.New("Obrigatório - Nome")

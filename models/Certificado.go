@@ -29,14 +29,15 @@ func (p *Certificado) Validate() error {
 	return nil
 }
 
-func (p *Certificado) Create(db *gorm.DB) (*Certificado, error) {
-	var err error
-	err = db.Debug().Model(&Certificado{}).Create(&p).Error
-	if err != nil {
-		return &Certificado{}, err
+func (p *Certificado) Create(db *gorm.DB) (int64, error) {
+	if verr := p.Validate(); verr != nil {
+		return -1, verr
 	}
-
-	return p, nil
+	err := db.Debug().Model(&Certificado{}).Create(&p).Error
+	if err != nil {
+		return 0, err
+	}
+	return int64(p.ID), nil
 }
 
 func (p *Certificado) ListAll(db *gorm.DB) (*[]Certificado, error) {
@@ -50,8 +51,7 @@ func (p *Certificado) ListAll(db *gorm.DB) (*[]Certificado, error) {
 }
 
 func (p *Certificado) Find(db *gorm.DB, pid uint64) (*Certificado, error) {
-	var err error
-	err = db.Debug().Model(&Certificado{}).Where("id = ?", pid).Take(&p).Error
+	err := db.Debug().Model(&Certificado{}).Where("id = ?", pid).Take(&p).Error
 	if err != nil {
 		return &Certificado{}, err
 	}
@@ -59,10 +59,7 @@ func (p *Certificado) Find(db *gorm.DB, pid uint64) (*Certificado, error) {
 }
 
 func (p *Certificado) Update(db *gorm.DB) (*Certificado, error) {
-
-	var err error
-
-	err = db.Debug().Model(&Certificado{}).Where("id = ?", p.ID).Take(&Certificado{}).UpdateColumns(
+	err := db.Debug().Model(&Certificado{}).Where("id = ?", p.ID).Take(&Certificado{}).UpdateColumns(
 		map[string]interface{}{
 			"EventoID":       p.EventoID,
 			"Evento":         p.Evento,
