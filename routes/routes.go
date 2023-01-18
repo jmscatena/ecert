@@ -25,11 +25,15 @@ func ConfigRoutes(router *gin.Engine) *gin.Engine {
 				controllers.Get[models.Usuario](context, &obj, uint64(uid))
 			})
 
-			user.PATCH("/", func(context *gin.Context) {
+			user.PATCH("/:id", func(context *gin.Context) {
 				uid, _ := strconv.ParseInt(context.Param("id"), 10, 64)
 				controllers.Modify[models.Usuario](context, &obj, uint64(uid))
 			})
-			user.DELETE("/", controllers.Index)
+			user.DELETE("/:id", func(context *gin.Context) {
+				uid, _ := strconv.ParseInt(context.Param("id"), 10, 64)
+				controllers.Erase[models.Usuario](context, &obj, uint64(uid))
+			})
+
 		}
 		inst := main.Group("instituicao")
 		{
@@ -44,11 +48,14 @@ func ConfigRoutes(router *gin.Engine) *gin.Engine {
 				uid, _ := strconv.ParseInt(context.Param("id"), 10, 64)
 				controllers.Get[models.Instituicao](context, &obj, uint64(uid))
 			})
-			inst.PATCH("/", func(context *gin.Context) {
+			inst.PATCH("/:id", func(context *gin.Context) {
 				uid, _ := strconv.ParseInt(context.Param("id"), 10, 64)
 				controllers.Modify[models.Instituicao](context, &obj, uint64(uid))
 			})
-			inst.DELETE("/", controllers.Index)
+			inst.DELETE("/:id", func(context *gin.Context) {
+				uid, _ := strconv.ParseInt(context.Param("id"), 10, 64)
+				controllers.Erase[models.Instituicao](context, &obj, uint64(uid))
+			})
 		}
 		event := main.Group("evento")
 		{
@@ -63,11 +70,14 @@ func ConfigRoutes(router *gin.Engine) *gin.Engine {
 				uid, _ := strconv.ParseInt(context.Param("id"), 10, 64)
 				controllers.Get[models.Evento](context, &obj, uint64(uid))
 			})
-			event.PATCH("/", func(context *gin.Context) {
+			event.PATCH("/:id", func(context *gin.Context) {
 				uid, _ := strconv.ParseInt(context.Param("id"), 10, 64)
 				controllers.Modify[models.Evento](context, &obj, uint64(uid))
 			})
-			event.DELETE("/", controllers.Index)
+			event.DELETE("/:id", func(context *gin.Context) {
+				uid, _ := strconv.ParseInt(context.Param("id"), 10, 64)
+				controllers.Erase[models.Evento](context, &obj, uint64(uid))
+			})
 		}
 		cert := main.Group("cert")
 		{
@@ -82,11 +92,14 @@ func ConfigRoutes(router *gin.Engine) *gin.Engine {
 				uid, _ := strconv.ParseInt(context.Param("id"), 10, 64)
 				controllers.Get[models.Certificado](context, &obj, uint64(uid))
 			})
-			cert.PATCH("/", func(context *gin.Context) {
+			cert.PATCH("/:id", func(context *gin.Context) {
 				uid, _ := strconv.ParseInt(context.Param("id"), 10, 64)
 				controllers.Modify[models.Certificado](context, &obj, uint64(uid))
 			})
-			cert.DELETE("/", controllers.Index)
+			cert.DELETE("/:id", func(context *gin.Context) {
+				uid, _ := strconv.ParseInt(context.Param("id"), 10, 64)
+				controllers.Erase[models.Certificado](context, &obj, uint64(uid))
+			})
 		}
 		certval := main.Group("valida")
 		{
@@ -105,7 +118,10 @@ func ConfigRoutes(router *gin.Engine) *gin.Engine {
 				uid, _ := strconv.ParseInt(context.Param("id"), 10, 64)
 				controllers.Modify[models.CertVal](context, &obj, uint64(uid))
 			})
-
+			certval.DELETE("/:id", func(context *gin.Context) {
+				uid, _ := strconv.ParseInt(context.Param("id"), 10, 64)
+				controllers.Erase[models.CertVal](context, &obj, uint64(uid))
+			})
 		}
 
 		//main.POST("login", controllers.Login)

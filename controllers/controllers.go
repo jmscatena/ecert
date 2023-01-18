@@ -44,6 +44,18 @@ func Modify[T interfaces.Tables](c *gin.Context, o interfaces.PersistenceHandler
 	}
 }
 
+func Erase[T interfaces.Tables](c *gin.Context, o interfaces.PersistenceHandler[T], uid uint64) {
+	if reflect.TypeOf(o) != nil {
+		var handler interfaces.PersistenceHandler[T] = o
+		code, cerr := services.Del(handler, uid)
+
+		if cerr != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"status": http.StatusText(http.StatusBadRequest), "data": cerr})
+		}
+		c.JSON(http.StatusCreated, gin.H{"status": http.StatusText(http.StatusCreated), "data": code})
+	}
+}
+
 func Get[T interfaces.Tables](c *gin.Context, o interfaces.PersistenceHandler[T], uid uint64) {
 	if reflect.TypeOf(o) != nil {
 		if uid == 0 {

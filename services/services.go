@@ -38,6 +38,20 @@ func Update[T interfaces.Tables](o interfaces.PersistenceHandler[T], uid uint64)
 	return rec, nil
 }
 
+func Del[T interfaces.Tables](o interfaces.PersistenceHandler[T], uid uint64) (int64, error) {
+	db, err := database.Init()
+	if err != nil {
+		log.Fatalln(err)
+		return -1, err
+	}
+	rec, err := o.Delete(db, uid)
+	if err != nil {
+		log.Fatalln(err)
+		return 0, err
+	}
+	return rec, nil
+}
+
 func Get[T interfaces.Tables](o interfaces.PersistenceHandler[T], uid uint64) (*T, error) {
 	db, err := database.Init()
 	if err != nil {

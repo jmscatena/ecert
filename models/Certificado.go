@@ -72,9 +72,9 @@ func (p *Certificado) Update(db *gorm.DB, uid uint64) (*Certificado, error) {
 	return p, nil
 }
 
-func (p *Certificado) Delete(db *gorm.DB, pid uint64, uid uint64) (int64, error) {
+func (p *Certificado) Delete(db *gorm.DB, uid uint64) (int64, error) {
 
-	db = db.Debug().Model(&Certificado{}).Where("id = ? and apresentador_id = ?", pid, uid).Take(&Certificado{}).Delete(&Certificado{})
+	db = db.Debug().Model(&Certificado{}).Where("id = ? ", uid).Take(&Certificado{}).Delete(&Certificado{})
 
 	if db.Error != nil {
 		return 0, db.Error

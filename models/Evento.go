@@ -94,7 +94,7 @@ func (p *Evento) Find(db *gorm.DB, pid uint64) (*Evento, error) {
 }
 
 func (p *Evento) Update(db *gorm.DB, uid uint64) (*Evento, error) {
-	err := db.Debug().Model(&Evento{}).Where("id = ?", p.ID).Take(&Evento{}).UpdateColumns(
+	err := db.Debug().Model(&Evento{}).Where("id = ?", uid).Take(&Evento{}).UpdateColumns(
 		map[string]interface{}{
 			"Descricao":      p.Descricao,
 			"Apresentador":   p.Apresentador,
@@ -117,9 +117,9 @@ func (p *Evento) Update(db *gorm.DB, uid uint64) (*Evento, error) {
 	return p, nil
 }
 
-func (p *Evento) Delete(db *gorm.DB, pid uint64, uid uint64) (int64, error) {
+func (p *Evento) Delete(db *gorm.DB, uid uint64) (int64, error) {
 
-	db = db.Debug().Model(&Evento{}).Where("id = ? and apresentador_id = ?", pid, uid).Take(&Evento{}).Delete(&Evento{})
+	db = db.Debug().Model(&Evento{}).Where("id = ? ", uid).Take(&Evento{}).Delete(&Evento{})
 
 	if db.Error != nil {
 		return 0, db.Error

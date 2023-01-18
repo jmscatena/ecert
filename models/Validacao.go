@@ -67,9 +67,9 @@ func (v *CertVal) Update(db *gorm.DB, uid uint64) (*CertVal, error) {
 	return v, nil
 }
 
-func (v *CertVal) Delete(db *gorm.DB, pid uint64, uid uint64) (int64, error) {
+func (v *CertVal) Delete(db *gorm.DB, uid uint64) (int64, error) {
 
-	db = db.Debug().Model(&CertVal{}).Where("id = ? and apresentador_id = ?", pid, uid).Take(&CertVal{}).Delete(&CertVal{})
+	db = db.Debug().Model(&CertVal{}).Where("id = ? ", uid).Take(&CertVal{}).Delete(&CertVal{})
 
 	if db.Error != nil {
 		return 0, db.Error
