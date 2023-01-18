@@ -18,7 +18,7 @@ type CertVal struct {
 func (v *CertVal) Validate() error {
 
 	if v.CertificadoID == 0 {
-		return errors.New("Obrigatório - ID Certificado")
+		return errors.New("obrigatório: idcertificado")
 	}
 
 	return nil
@@ -46,20 +46,16 @@ func (v *CertVal) List(db *gorm.DB) (*[]CertVal, error) {
 	return &CertVals, nil
 }
 
-func (v *CertVal) Find(db *gorm.DB, pid uint64) (*CertVal, error) {
-	var err error
-	err = db.Debug().Model(&CertVal{}).Where("id = ?", pid).Take(&v).Error
+func (v *CertVal) Find(db *gorm.DB, uid uint64) (*CertVal, error) {
+	err := db.Debug().Model(&CertVal{}).Where("id = ?", uid).Take(&v).Error
 	if err != nil {
 		return &CertVal{}, err
 	}
 	return v, nil
 }
 
-func (v *CertVal) Update(db *gorm.DB) (*CertVal, error) {
-
-	var err error
-
-	err = db.Debug().Model(&CertVal{}).Where("id = ?", v.ID).Take(&CertVal{}).UpdateColumns(
+func (v *CertVal) Update(db *gorm.DB, uid uint64) (*CertVal, error) {
+	err := db.Debug().Model(&CertVal{}).Where("id = ?", uid).Take(&CertVal{}).UpdateColumns(
 		map[string]interface{}{
 			"CertificadoID": v.CertificadoID,
 			"Certificado":   v.Certificado,

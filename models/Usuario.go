@@ -53,18 +53,16 @@ func (u *Usuario) Create(db *gorm.DB) (int64, error) {
 }
 
 func (u *Usuario) List(db *gorm.DB) (*[]Usuario, error) {
-	var err error
 	Usuarios := []Usuario{}
-	err = db.Debug().Model(&Usuario{}).Limit(100).Find(&Usuarios).Error
+	err := db.Debug().Model(&Usuario{}).Limit(100).Find(&Usuarios).Error
 	if err != nil {
-		return &[]Usuario{}, err
+		return nil, err
 	}
 	return &Usuarios, err
 }
 
 func (u *Usuario) Find(db *gorm.DB, uid uint64) (*Usuario, error) {
-	var err error
-	err = db.Debug().Model(Usuario{}).Where("id = ?", uid).Take(&u).Error
+	err := db.Debug().Model(Usuario{}).Where("id = ?", uid).Take(&u).Error
 	if err != nil {
 		return &Usuario{}, err
 	}
@@ -76,7 +74,10 @@ func (u *Usuario) Find(db *gorm.DB, uid uint64) (*Usuario, error) {
 
 func (u *Usuario) Update(db *gorm.DB, uid uint64) (*Usuario, error) {
 
-	// To hash the Senha
+	if verr := u.Validate("insert"); verr != nil {
+		return nil, verr
+	}
+	u.Prepare()
 
 	db = db.Debug().Model(&Usuario{}).Where("id = ?", uid).Take(&Usuario{}).UpdateColumns(
 		map[string]interface{}{
@@ -90,7 +91,6 @@ func (u *Usuario) Update(db *gorm.DB, uid uint64) (*Usuario, error) {
 	if db.Error != nil {
 		return &Usuario{}, db.Error
 	}
-	// This is the display the updated Usuario
 	err := db.Debug().Model(&Usuario{}).Where("id = ?", uid).Take(&u).Error
 	if err != nil {
 		return &Usuario{}, err
@@ -112,41 +112,41 @@ func (u *Usuario) Validate(action string) error {
 	switch strings.ToLower(action) {
 	case "update":
 		if u.Nome == "" {
-			return errors.New("Obrigatório - Nome")
+			return errors.New("obrigatório: nome")
 		}
 		if u.Senha == "" {
-			return errors.New("Obrigatório - Senha")
+			return errors.New("obrigatório: senha")
 		}
 		if u.Email == "" {
-			return errors.New("Obrigatório - Email")
+			return errors.New("obrigatório: email")
 		}
 		if err := checkmail.ValidateFormat(u.Email); err != nil {
-			return errors.New("Inválido - Email")
+			return errors.New("inválido: email")
 		}
 		return nil
 	case "login":
 		if u.Senha == "" {
-			return errors.New("Obrigatório - Senha")
+			return errors.New("obrigatório: senha")
 		}
 		if u.Email == "" {
-			return errors.New("Obrigatório - Email")
+			return errors.New("obrigatório: email")
 		}
 		if err := checkmail.ValidateFormat(u.Email); err != nil {
-			return errors.New("Inválido - Email")
+			return errors.New("inválido: email")
 		}
 		return nil
 	default:
 		if u.Nome == "" {
-			return errors.New("Obrigatório - Nome")
+			return errors.New("obrigatório: nome")
 		}
 		if u.Senha == "" {
-			return errors.New("Obrigatório - Senha")
+			return errors.New("obrigatório: senha")
 		}
 		if u.Email == "" {
-			return errors.New("Obrigatório - Email")
+			return errors.New("obrigatório: email")
 		}
 		if err := checkmail.ValidateFormat(u.Email); err != nil {
-			return errors.New("Inválido - Email")
+			return errors.New("inválido: email")
 		}
 		return nil
 	}

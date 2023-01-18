@@ -24,13 +24,42 @@ func New[T interfaces.Tables](o interfaces.PersistenceHandler[T]) (int64, error)
 	return 0, nil
 }
 
-func Find[T interfaces.Tables](o interfaces.PersistenceHandler[T], uid uint64) (*T, error) {
+func Update[T interfaces.Tables](o interfaces.PersistenceHandler[T], uid uint64) (*T, error) {
+	db, err := database.Init()
+	if err != nil {
+		log.Fatalln(err)
+		return nil, err
+	}
+	rec, err := o.Update(db, uid)
+	if err != nil {
+		log.Fatalln(err)
+		return nil, err
+	}
+	return rec, nil
+}
+
+func Get[T interfaces.Tables](o interfaces.PersistenceHandler[T], uid uint64) (*T, error) {
 	db, err := database.Init()
 	if err != nil {
 		log.Fatalln(err)
 		return nil, err
 	}
 	rec, err := o.Find(db, uid)
+	if err != nil {
+		log.Fatalln(err)
+		return nil, err
+	}
+	return rec, nil
+}
+
+func GetAll[T interfaces.Tables](o interfaces.PersistenceHandler[T]) (*[]T, error) {
+	db, err := database.Init()
+	if err != nil {
+		log.Fatalln(err)
+		return nil, err
+	}
+	var rec *[]T
+	rec, err = o.List(db)
 	if err != nil {
 		log.Fatalln(err)
 		return nil, err

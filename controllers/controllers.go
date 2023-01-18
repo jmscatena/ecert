@@ -20,7 +20,22 @@ func Add[T interfaces.Tables](c *gin.Context, o interfaces.PersistenceHandler[T]
 			c.JSON(http.StatusBadRequest, gin.H{"status": http.StatusText(http.StatusBadRequest), "data": err})
 		}
 		var handler interfaces.PersistenceHandler[T] = o
-		code, cerr := services.New[T](handler)
+		code, cerr := services.New(handler)
+
+		if cerr != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"status": http.StatusText(http.StatusBadRequest), "data": cerr})
+		}
+		c.JSON(http.StatusCreated, gin.H{"status": http.StatusText(http.StatusCreated), "data": code})
+	}
+}
+
+func Modify[T interfaces.Tables](c *gin.Context, o interfaces.PersistenceHandler[T], uid uint64) {
+	if reflect.TypeOf(o) != nil {
+		if err := c.ShouldBindJSON(&o); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"status": http.StatusText(http.StatusBadRequest), "data": err})
+		}
+		var handler interfaces.PersistenceHandler[T] = o
+		code, cerr := services.Update(handler, uid)
 
 		if cerr != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"status": http.StatusText(http.StatusBadRequest), "data": cerr})
@@ -35,10 +50,22 @@ func Get[T interfaces.Tables](c *gin.Context, o interfaces.PersistenceHandler[T]
 			c.JSON(http.StatusNotFound, gin.H{"status": http.StatusText(http.StatusNotFound), "data": "No Data"})
 		}
 		var handler interfaces.PersistenceHandler[T] = o
-		rec, cerr := services.Find[T](handler, uid)
+		rec, cerr := services.Get(handler, uid)
 
 		if cerr != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"status": http.StatusText(http.StatusBadRequest), "data": cerr})
+		}
+		c.JSON(http.StatusOK, gin.H{"data": rec, "status": http.StatusText(http.StatusOK)})
+	}
+}
+
+func GetAll[T interfaces.Tables](c *gin.Context, o interfaces.PersistenceHandler[T]) {
+	if reflect.TypeOf(o) != nil {
+		var handler interfaces.PersistenceHandler[T] = o
+		rec, cerr := services.GetAll(handler)
+		if cerr != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"status": http.StatusText(http.StatusBadRequest),
+				"data": cerr})
 		}
 		c.JSON(http.StatusOK, gin.H{"data": rec, "status": http.StatusText(http.StatusOK)})
 	}

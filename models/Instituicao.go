@@ -20,19 +20,19 @@ type Instituicao struct {
 
 func (i *Instituicao) Validate(action string) error {
 	if i.Nome == "" {
-		return errors.New("Obrigatório - Nome")
+		return errors.New("obrigatório: nome")
 	}
 	if i.Responsavel == "" {
-		return errors.New("Obrigatório - Responsável")
+		return errors.New("obrigatório: responsável")
 	}
 	if i.Email == "" {
-		return errors.New("Obrigatório - Email")
+		return errors.New("obrigatório: email")
 	}
 	if i.Tel == "" {
-		return errors.New("Obrigatório - Telefone")
+		return errors.New("obrigatório: telefone")
 	}
 	if err := checkmail.ValidateFormat(i.Email); err != nil {
-		return errors.New("Inválido - Email")
+		return errors.New("inválido: email")
 	}
 	return nil
 }
@@ -52,7 +52,7 @@ func (i *Instituicao) Find(db *gorm.DB, uuid uint64) (*Instituicao, error) {
 		return &Instituicao{}, err
 	}
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return &Instituicao{}, errors.New("Usuário Inexistente")
+		return &Instituicao{}, errors.New("usuário: inexistente")
 	}
 	return i, err
 }

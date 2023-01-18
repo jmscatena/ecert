@@ -33,13 +33,13 @@ func (p *Evento) Prepare() {
 func (p *Evento) Validate() error {
 
 	if p.Descricao == "" {
-		return errors.New("Obrigatório - Evento")
+		return errors.New("obrigatório: evento")
 	}
 	if p.Local == "" {
-		return errors.New("Obrigatório - Local")
+		return errors.New("obrigatório: local")
 	}
 	if p.ApresentadorID < 1 {
-		return errors.New("Obrigatório - Apresentador")
+		return errors.New("obrigatório: apresentador")
 	}
 	return nil
 }
@@ -69,7 +69,7 @@ func (p *Evento) List(db *gorm.DB) (*[]Evento, error) {
 		return &[]Evento{}, err
 	}
 	if len(Eventos) > 0 {
-		for i, _ := range Eventos {
+		for i := range Eventos {
 			err := db.Debug().Model(&Usuario{}).Where("id = ?", Eventos[i].ApresentadorID).Take(&Eventos[i].Apresentador).Error
 			if err != nil {
 				return &[]Evento{}, err
@@ -80,8 +80,7 @@ func (p *Evento) List(db *gorm.DB) (*[]Evento, error) {
 }
 
 func (p *Evento) Find(db *gorm.DB, pid uint64) (*Evento, error) {
-	var err error
-	err = db.Debug().Model(&Evento{}).Where("id = ?", pid).Take(&p).Error
+	err := db.Debug().Model(&Evento{}).Where("id = ?", pid).Take(&p).Error
 	if err != nil {
 		return &Evento{}, err
 	}
@@ -94,7 +93,7 @@ func (p *Evento) Find(db *gorm.DB, pid uint64) (*Evento, error) {
 	return p, nil
 }
 
-func (p *Evento) Update(db *gorm.DB) (*Evento, error) {
+func (p *Evento) Update(db *gorm.DB, uid uint64) (*Evento, error) {
 	err := db.Debug().Model(&Evento{}).Where("id = ?", p.ID).Take(&Evento{}).UpdateColumns(
 		map[string]interface{}{
 			"Descricao":      p.Descricao,

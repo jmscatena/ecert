@@ -11,8 +11,8 @@ type Tables interface {
 
 type PersistenceHandler[T Tables] interface {
 	Create(db *gorm.DB) (int64, error)
-	//List(db *gorm.DB) ([]T, error)
-	//Update(db *gorm.DB, uid uint64) (T, error)
+	List(db *gorm.DB) (*[]T, error)
+	Update(db *gorm.DB, uid uint64) (*T, error)
 	//Delete(db *gorm.DB, uid uint64) (T, error)
 	Find(db *gorm.DB, uid uint64) (*T, error)
 }

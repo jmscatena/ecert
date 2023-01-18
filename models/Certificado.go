@@ -21,10 +21,10 @@ type Certificado struct {
 func (p *Certificado) Validate() error {
 
 	if p.EventoID < 1 {
-		return errors.New("Obrigatório - Evento")
+		return errors.New("obrigatório: evento")
 	}
 	if p.ParticipanteID < 1 {
-		return errors.New("Obrigatório - Apresentador")
+		return errors.New("obrigatório: apresentador")
 	}
 	return nil
 }
@@ -40,26 +40,25 @@ func (p *Certificado) Create(db *gorm.DB) (int64, error) {
 	return int64(p.ID), nil
 }
 
-func (p *Certificado) ListAll(db *gorm.DB) (*[]Certificado, error) {
-	var err error
+func (p *Certificado) List(db *gorm.DB) (*[]Certificado, error) {
 	Certificados := []Certificado{}
-	err = db.Debug().Model(&Certificado{}).Limit(100).Find(&Certificados).Error
+	err := db.Debug().Model(&Certificado{}).Limit(100).Find(&Certificados).Error
 	if err != nil {
 		return &[]Certificado{}, err
 	}
 	return &Certificados, nil
 }
 
-func (p *Certificado) Find(db *gorm.DB, pid uint64) (*Certificado, error) {
-	err := db.Debug().Model(&Certificado{}).Where("id = ?", pid).Take(&p).Error
+func (p *Certificado) Find(db *gorm.DB, uid uint64) (*Certificado, error) {
+	err := db.Debug().Model(&Certificado{}).Where("id = ?", uid).Take(&p).Error
 	if err != nil {
 		return &Certificado{}, err
 	}
 	return p, nil
 }
 
-func (p *Certificado) Update(db *gorm.DB) (*Certificado, error) {
-	err := db.Debug().Model(&Certificado{}).Where("id = ?", p.ID).Take(&Certificado{}).UpdateColumns(
+func (p *Certificado) Update(db *gorm.DB, uid uint64) (*Certificado, error) {
+	err := db.Debug().Model(&Certificado{}).Where("id = ?", uid).Take(&Certificado{}).UpdateColumns(
 		map[string]interface{}{
 			"EventoID":       p.EventoID,
 			"Evento":         p.Evento,
@@ -68,7 +67,7 @@ func (p *Certificado) Update(db *gorm.DB) (*Certificado, error) {
 			"UpdatedAt":      time.Now()}).Error
 
 	if err != nil {
-		return &Certificado{}, err
+		return nil, err
 	}
 	return p, nil
 }
