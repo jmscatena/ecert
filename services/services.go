@@ -80,3 +80,17 @@ func GetAll[T interfaces.Tables](o interfaces.PersistenceHandler[T]) (*[]T, erro
 	}
 	return rec, nil
 }
+
+func GetBy[T interfaces.Tables](o interfaces.PersistenceHandler[T], param string, uid interface{}) (*[]T, error) {
+	db, err := database.Init()
+	if err != nil {
+		log.Fatalln(err)
+		return nil, err
+	}
+	rec, err := o.FindBy(db, param, uid)
+	if err != nil {
+		log.Fatalln(err)
+		return nil, err
+	}
+	return rec, nil
+}
