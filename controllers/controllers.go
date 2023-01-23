@@ -82,3 +82,18 @@ func GetAll[T interfaces.Tables](c *gin.Context, o interfaces.PersistenceHandler
 		c.JSON(http.StatusOK, gin.H{"data": rec, "status": http.StatusText(http.StatusOK)})
 	}
 }
+
+func GetBy[T interfaces.Tables](c *gin.Context, o interfaces.PersistenceHandler[T], param string, uid ...interface{}) {
+	if reflect.TypeOf(o) != nil {
+		if len(uid) == 0 {
+			c.JSON(http.StatusNotFound, gin.H{"status": http.StatusText(http.StatusNotFound), "data": "No Data"})
+		}
+		var handler interfaces.PersistenceHandler[T] = o
+		rec, cerr := services.GetBy(handler, param, uid)
+
+		if cerr != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"status": http.StatusText(http.StatusBadRequest), "data": cerr})
+		}
+		c.JSON(http.StatusOK, gin.H{"data": rec, "status": http.StatusText(http.StatusOK)})
+	}
+}

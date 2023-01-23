@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -53,6 +54,19 @@ func (v *CertVal) Find(db *gorm.DB, uid uint64) (*CertVal, error) {
 	}
 	return v, nil
 }
+func (v *CertVal) FindBy(db *gorm.DB, param string, uid ...interface{}) (*[]CertVal, error) {
+	CertVals := []CertVal{}
+	params := strings.Split(param, ";")
+	uids := uid[0].([]interface{})
+	if len(params) != len(uids) {
+		return nil, errors.New("condição inválida")
+	}
+	result := db.Where(strings.Join(params, " AND "), uids...).Find(&CertVals)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &CertVals, nil
+}
 
 func (v *CertVal) Update(db *gorm.DB, uid uint64) (*CertVal, error) {
 	err := db.Debug().Model(&CertVal{}).Where("id = ?", uid).Take(&CertVal{}).UpdateColumns(
@@ -75,4 +89,12 @@ func (v *CertVal) Delete(db *gorm.DB, uid uint64) (int64, error) {
 		return 0, db.Error
 	}
 	return db.RowsAffected, nil
+}
+
+func (v *CertVal) DeleteBy(db *gorm.DB, cond string, uid uint64) (int64, error) {
+	result := db.Delete(&CertVal{}, cond+" = ?", uid)
+	if result.Error != nil {
+		return 0, result.Error
+	}
+	return result.RowsAffected, nil
 }

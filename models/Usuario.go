@@ -23,23 +23,6 @@ type Usuario struct {
 	UpdatedAt    time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"atualizado_em"`
 }
 
-func Hash(Senha string) []byte {
-	hash, _ := bcrypt.GenerateFromPassword([]byte(Senha), bcrypt.DefaultCost)
-	return hash
-}
-
-func VerifySenha(hashedSenha, Senha string) error {
-	return bcrypt.CompareHashAndPassword([]byte(hashedSenha), []byte(Senha))
-}
-
-func (u *Usuario) Prepare() {
-	u.Nome = html.EscapeString(strings.TrimSpace(u.Nome))
-	u.Email = html.EscapeString(strings.TrimSpace(u.Email))
-	u.Senha = string(Hash(u.Senha))
-	u.CreatedAt = time.Now()
-	u.UpdatedAt = time.Now()
-}
-
 func (u *Usuario) Create(db *gorm.DB) (int64, error) {
 	if verr := u.Validate("insert"); verr != nil {
 		return -2, verr
@@ -50,26 +33,6 @@ func (u *Usuario) Create(db *gorm.DB) (int64, error) {
 		return 0, err
 	}
 	return int64(u.ID), nil
-}
-
-func (u *Usuario) List(db *gorm.DB) (*[]Usuario, error) {
-	Usuarios := []Usuario{}
-	err := db.Debug().Model(&Usuario{}).Limit(100).Find(&Usuarios).Error
-	if err != nil {
-		return nil, err
-	}
-	return &Usuarios, err
-}
-
-func (u *Usuario) Find(db *gorm.DB, uid uint64) (*Usuario, error) {
-	err := db.Debug().Model(Usuario{}).Where("id = ?", uid).Take(&u).Error
-	if err != nil {
-		return &Usuario{}, err
-	}
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return &Usuario{}, errors.New("Usuario Inexistente")
-	}
-	return u, err
 }
 
 func (u *Usuario) Update(db *gorm.DB, uid uint64) (*Usuario, error) {
@@ -98,6 +61,40 @@ func (u *Usuario) Update(db *gorm.DB, uid uint64) (*Usuario, error) {
 	return u, nil
 }
 
+func (u *Usuario) List(db *gorm.DB) (*[]Usuario, error) {
+	Usuarios := []Usuario{}
+	err := db.Debug().Model(&Usuario{}).Limit(100).Find(&Usuarios).Error
+	if err != nil {
+		return nil, err
+	}
+	return &Usuarios, err
+}
+
+func (u *Usuario) Find(db *gorm.DB, uid uint64) (*Usuario, error) {
+	err := db.Debug().Model(Usuario{}).Where("id = ?", uid).Take(&u).Error
+	if err != nil {
+		return &Usuario{}, err
+	}
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return &Usuario{}, errors.New("Usuario Inexistente")
+	}
+	return u, err
+}
+
+func (u *Usuario) FindBy(db *gorm.DB, param string, uid ...interface{}) (*[]Usuario, error) {
+	Usuarios := []Usuario{}
+	params := strings.Split(param, ";")
+	uids := uid[0].([]interface{})
+	if len(params) != len(uids) {
+		return nil, errors.New("condição inválida")
+	}
+	result := db.Where(strings.Join(params, " AND "), uids...).Find(&Usuarios)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &Usuarios, nil
+}
+
 func (u *Usuario) Delete(db *gorm.DB, uid uint64) (int64, error) {
 
 	db = db.Debug().Model(&Usuario{}).Where("id = ?", uid).Take(&Usuario{}).Delete(&Usuario{})
@@ -106,6 +103,14 @@ func (u *Usuario) Delete(db *gorm.DB, uid uint64) (int64, error) {
 		return 0, db.Error
 	}
 	return db.RowsAffected, nil
+}
+
+func (u *Usuario) DeleteBy(db *gorm.DB, cond string, uid interface{}) (int64, error) {
+	result := db.Delete(&Usuario{}, cond+" = ?", uid)
+	if result.Error != nil {
+		return 0, result.Error
+	}
+	return result.RowsAffected, nil
 }
 
 func (u *Usuario) Validate(action string) error {
@@ -150,4 +155,21 @@ func (u *Usuario) Validate(action string) error {
 		}
 		return nil
 	}
+}
+
+func Hash(Senha string) []byte {
+	hash, _ := bcrypt.GenerateFromPassword([]byte(Senha), bcrypt.DefaultCost)
+	return hash
+}
+
+func VerifySenha(hashedSenha, Senha string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hashedSenha), []byte(Senha))
+}
+
+func (u *Usuario) Prepare() {
+	u.Nome = html.EscapeString(strings.TrimSpace(u.Nome))
+	u.Email = html.EscapeString(strings.TrimSpace(u.Email))
+	u.Senha = string(Hash(u.Senha))
+	u.CreatedAt = time.Now()
+	u.UpdatedAt = time.Now()
 }
